@@ -1,36 +1,37 @@
 const express = require('express')
 const bodyParser = require('body-parser');
 const app = express()
+const cors = require('cors')
 const ObjectId = require('mongodb').ObjectID;
 
 
 const MongoClient = require('mongodb').MongoClient;
-const uri = "mongodb+srv://Akash_Hossain:akash044@cluster0.ieei5.mongodb.net/organicdb?retryWrites=true&w=majority";
+const uri = "mongodb+srv://Akash_Hossain:akash044@cluster0.ieei5.mongodb.net/primeBooksDB?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
 app.use(express.json());
+app.use(cors())
 
 // app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }))
 
 app.get('/', (req, res) => {
-   res.sendFile(__dirname + '/index.html');
+   res.send('hello world');
 })
 
 client.connect(err => {
-   const collection = client.db("organicdb").collection("products");
+   const collection = client.db("primeBooksDB").collection("books");
    console.log("successfully connected")
 
-
    // read data from mongodb
-   app.get('/users', (req, res) => {
+   app.get('/books', (req, res) => {
       collection.find({})
          .toArray((err, documents) => {
             res.send(documents);
          })
    })
 
-   app.get('/user/:id', (req, res) => {
+   app.get('/book/:id', (req, res) => {
       collection.find({ _id: ObjectId(req.params.id) })
          .toArray((err, documents) => {
             res.send(documents[0]);
@@ -38,7 +39,7 @@ client.connect(err => {
    })
 
    // insert element in mongodb
-   app.post('/addUser', (req, res) => {
+   app.post('/addbook', (req, res) => {
       const studentInfo = req.body;
       collection.insertOne(studentInfo)
          .then(result => {
@@ -46,6 +47,7 @@ client.connect(err => {
             res.redirect("/");
          })
    })
+   
    app.patch('/update/:id', (req, res) => {
       collection.updateOne({ _id: ObjectId(req.params.id) },
          {
