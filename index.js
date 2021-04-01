@@ -6,7 +6,7 @@ const ObjectId = require('mongodb').ObjectID;
 
 
 const MongoClient = require('mongodb').MongoClient;
-const uri = "mongodb+srv://Akash_Hossain:akash044@cluster0.ieei5.mongodb.net/primeBooksDB?retryWrites=true&w=majority";
+const uri = "mongodb+srv://process.env.DB_USER:process.env.DB_PASS@cluster0.ieei5.mongodb.net/process.env.DB_NAME?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
 app.use(express.json());
@@ -21,16 +21,18 @@ app.get('/', (req, res) => {
 
 client.connect(err => {
    const collection = client.db("primeBooksDB").collection("books");
+   const ordersCollection = client.db("primeBooksDB").collection("orders");
    console.log("successfully connected")
 
-   // read data from mongodb
+   //  ALL BOOKS SECTION START HERE
+   // read all books
    app.get('/books', (req, res) => {
       collection.find({})
          .toArray((err, documents) => {
             res.send(documents);
          })
    })
-
+   // read specific book by id
    app.get('/book/:id', (req, res) => {
       collection.find({ _id: ObjectId(req.params.id) })
          .toArray((err, documents) => {
@@ -38,16 +40,16 @@ client.connect(err => {
          })
    })
 
-   // insert element in mongodb
+   // insert new book
    app.post('/addbook', (req, res) => {
-      const studentInfo = req.body;
-      collection.insertOne(studentInfo)
+      const bookInfo = req.body;
+      collection.insertOne(bookInfo)
          .then(result => {
             console.log("data added successfully");
             res.redirect("/");
          })
    })
-   
+
    app.patch('/update/:id', (req, res) => {
       collection.updateOne({ _id: ObjectId(req.params.id) },
          {
@@ -56,8 +58,8 @@ client.connect(err => {
          .then(res => console.log(res))
    })
 
-   //  delete an item
-   app.delete('/delete/:id', (req, res) => {
+   //  delete a book
+   app.delete('/deleteBook/:id', (req, res) => {
       console.log(req.params.id)
       collection.deleteOne({ _id: ObjectId(req.params.id) })
          .then(result => 
@@ -65,6 +67,28 @@ client.connect(err => {
                res.send(result.deletedCount > 0);
             })
    })
+   // ALL BOOKS SECTION END HERE
+
+   //ORDER SECTION START HERE
+   // add order
+   app.post('/addOrder', (req, res) => {
+      const orderInfo = req.body;
+      ordersCollection.insertOne(orderInfo)
+         .then(result => {
+            console.log("data added successfully");
+            res.send("successfully");
+         })
+   })
+
+   // read orders
+   app.get('/allOrder/:email', (req, res) => {
+      console.log(req.params.email);
+      ordersCollection.find({email: req.params.email })
+         .toArray((err, documents) => {
+            res.send(documents);
+         })
+   })
+   // ORDER SECTION END HERE
 
 
 
