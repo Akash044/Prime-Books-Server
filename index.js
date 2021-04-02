@@ -13,6 +13,10 @@ app.use(express.json());
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: false }))
 
+app.get('/', (req, res) => {
+   res.send("server working");
+})
+
 client.connect(err => {
    const collection = client.db(process.env.DB_NAME).collection(process.env.DB_COL1);
    const ordersCollection = client.db(process.env.DB_NAME).collection(process.env.DB_COL2);
